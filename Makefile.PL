@@ -8,6 +8,7 @@ WriteMakefile
           'VERSION_FROM' => 'lib/Devel/Sub/Which.pm',
           'PREREQ_PM' => {
                            'Test::More' => 0,
+                           'Test::Exception' => 0,
                            'B' => '0'
                          }
         )

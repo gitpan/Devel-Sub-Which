@@ -13,6 +13,7 @@ Module::Build->new(
 	},
 	build_requires => {
 		'Test::More' => 0,
+		'Test::Exception' => 0,
 	},
 	create_makefile_pl => 'traditional',
 	sign => 1,

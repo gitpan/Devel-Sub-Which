@@ -6,5 +6,7 @@ META.yml
 t/01-basic.t
 t/02-export.t
 t/03-errors.t
+t/04-regression.t
+t/99-distribution.t
 
 SIGNATURE    Added here by Module::Build
