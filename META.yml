@@ -1,0 +1,17 @@
+--- #YAML:1.0
+name: Devel-Sub-Which
+version: 0.01
+author:
+  - Yuval Kogman <nothingmuch@woobling.org>
+abstract: Name information about sub calls a lá ->can.
+license: perl
+requires:
+  B: 0
+  perl: '>= 5.6.0'
+build_requires:
+  Test::More: 0
+provides:
+  Devel::Sub::Which:
+    file: lib/Devel/Sub/Which.pm
+    version: 0.01
+generated_by: Module::Build version 0.250.0
