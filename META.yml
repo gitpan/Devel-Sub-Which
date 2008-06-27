@@ -1,20 +1,15 @@
 --- #YAML:1.0
-name: Devel-Sub-Which
-version: 0.02
-author:
-  - Yuval Kogman <nothingmuch@woobling.org>
-abstract: |-
-  Name information about sub calls à la L<UNIVERSAL/can> and
-  <which(1)>.
-license: perl
-requires:
-  B: 0
-  perl: '>= 5.6.0'
-build_requires:
-  Test::Exception: 0
-  Test::More: 0
-provides:
-  Devel::Sub::Which:
-    file: lib/Devel/Sub/Which.pm
-    version: 0.02
-generated_by: Module::Build version 0.250.0
+name:                Devel-Sub-Which
+version:             0.03
+abstract:            ~
+license:             ~
+author:              ~
+generated_by:        ExtUtils::MakeMaker version 6.44
+distribution_type:   module
+requires:     
+    Sub::Identify:                 0
+    Test::Exception:               0
+    Test::More:                    0
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
+    version: 1.3
