@@ -7,26 +7,18 @@ package Devel::Sub::Which;
 use strict;
 use warnings;
 
-our $VERSION = "0.04";
+our $VERSION = "0.05";
 
 use Sub::Identify qw(sub_fullname);
 use Scalar::Util qw/reftype/;
 use Carp qw/croak/;
 
-use base qw/Exporter/;
-our @EXPORT_OK = qw/which ref_to_name/;
-
-sub import {
-	my $pkg = shift;
-
-	my $universal = undef;
-
-	@_ = ($pkg, grep { not ($_ eq ":universal" and $universal=1) } @_);
-
-	*UNIVERSAL::which = \&which if $universal;
-
-	goto \&Exporter::import;
-}
+use Sub::Exporter -setup => {
+	exports => [qw(which ref_to_name)],
+	collectors => {
+		':universal' => sub { *UNIVERSAL::which = \&which; return 1 },
+	}
+};
 
 sub which ($;$) {
 	my $obj = shift;
@@ -34,11 +26,12 @@ sub which ($;$) {
 
 	return sub_fullname($obj) if not defined $sub; # just a sub, no object
 
-	if (ref $sub and reftype $sub eq 'CODE'){ # this is not documented, it's for sanity.
+	if (ref($sub) and reftype($sub) eq 'CODE'){
 		return sub_fullname($sub);
 	} else {
 		my $ref = $obj->can($sub);
-		croak("$obj\->can($sub) did not return a code reference") unless ref $ref and reftype $ref eq 'CODE';
+		croak("$obj\->can($sub) did not return a code reference")
+			unless ref($ref) and reftype($ref) eq 'CODE';
 		return sub_fullname($ref);
 	}
 }
@@ -46,7 +39,7 @@ sub which ($;$) {
 sub ref_to_name ($) {
 	my $sub = shift;
 
-	unless (ref $sub and reftype $sub eq 'CODE'){ # this is not documented, it's for sanity.
+	unless (ref($sub) and reftype($sub) eq 'CODE'){
 		croak "$sub is not a code reference";
 	}
 
@@ -66,14 +59,27 @@ Devel::Sub::Which - Name information about sub calls à la L<UNIVERSAL/can> and
 
 =head1 SYNOPSIS
 
-	use Devel::Sub::Which qw/:universal/;
+	{
+		# inject 'which' into a class:
+		package Foo;
+		use Devel::Sub::Which qw(which);
+	}
 
-	# elsewhere
+	# or into UNIVERSAL (best avoided except as a temporary measure)
+	use Devel::Sub::Which qw(:universal);
 
+
+	# introspect like this:
 	$obj->which("foo"); # returns the name of the sub that
 	                    # will implement the "foo" method
 
-	Devel::Sub::Which::which($code_ref); # returns the name of the ref
+	# or like this:
+	Devel::Sub::Which::which( $obj, "foo" );
+
+
+	# which is equivalent to:
+	my $code_ref = $obj->can("foo");
+	Devel::Sub::Which::which($code_ref);
 
 =head1 DESCRIPTION
 
@@ -81,19 +87,20 @@ I don't like the perl debugger. I'd rather print debug statements as I go
 along, mostly saying "i'm going to do so and so", so I know what to look for
 when stuff breaks.
 
-Often I find myself faced with polymorphism crap flying into my. With
-multiple inheritence, delegations, runtime generated classes, method calls on
-non predeterminate values, and so forth, it sometimes makes sense to do:
+I also like to make extensive use of polymorphism. Due to the richness of
+Perl's OO, we have multiple inheritence, delegations, runtime generated
+classes, method calls on non predeterminate values, etc, and it often makes
+sense to do:
 
-	my $method = < blah blah blah >;
+	my $method = "foo";;
 
 	debug("i'm going to call $method on $obj. FYI, it's going to be "
 		. $obj->which($method));
 
 	$obj->$method()
 
-In order to figure out exactly which $method was responsible for your error, or
-whatever. This helps the above debugging style by providing more deterministic
+In order to figure out exactly which definition of C<$method> is going to be
+invoked. This helps the above debugging style by providing more deterministic
 reporting.
 
 =head1 METHODS
@@ -103,7 +110,10 @@ reporting.
 =item OBJ->which( METHOD )
 
 This method determines which subroutine reference will be executed for METHOD,
-using L<UNIVERSAL::can> (or any overriding implementation), 
+using L<UNIVERSAL::can> (or any overriding implementation),
+
+You can get this method by importing it as a function into a class, or using
+the C<:universal> export.
 
 =back
 
@@ -122,7 +132,10 @@ just delegates to L<Sub::Identify>
 
 =head1 EXPORTS
 
-Nothing is exported by default. These parameters will have an effect:
+
+Nothing is exported by default.
+
+This module uses L<Sub::Exporter>, so exports can be renamed, etc.
 
 =over 4
 
@@ -133,12 +146,19 @@ it on any object.
 
 =item which
 
+You can import this into a class and then use it as a method.
+
+=item ref_to_name
+
+Provided for compatibility. Just use L<Sub::Identify>.
+
 =back
 
 =head1 ACKNOWLEGEMENTS
 
 Yitzchak Scott-Thoennes provided the know-how needed to get the name of a sub
-reference.
+reference. I've since switched to using L<Sub::Identify>, which abstract those
+details away.
 
 =head1 VERSION CONTROL
 
